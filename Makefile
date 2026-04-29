@@ -2,12 +2,11 @@ export THEOS_PACKAGE_DIR_NAME = packages
 export TARGET = iphone:clang:latest:11.0
 export ARCHS = arm64 arm64e
 
-THEOS_PACKAGE_SCHEME = jailed
+MODULES = jailed
 
 INSTALL_TARGET_PROCESSES = MobileMLBB
 
 include $(THEOS)/makefiles/common.mk
-include $(THEOS)/modules/theos-jailed/module/common.mk
 
 TWEAK_NAME = MLBBESP
 
