@@ -407,7 +407,11 @@ float distance3D(Vector3 a, Vector3 b) {
 }
 
 - (void)createMenu {
-    UIWindow *window = self.fab.superview;
+    // Ambil window dengan aman
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    if (!window) {
+        window = [UIApplication sharedApplication].windows.firstObject;
+    }
     if (!window) return;
     
     self.menuPanel = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 260, 380)];
