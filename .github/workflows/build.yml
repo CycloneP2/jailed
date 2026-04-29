@@ -8,43 +8,63 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
-          
-      - name: Setup Theos (Manual)
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install ldid make xz dpkg
+
+      - name: Setup Theos Manual
         run: |
           set -e
-          export THEOS=$HOME/theos
+
+          export THEOS="$HOME/theos"
+
+          echo "Cleaning old Theos if exists..."
+          rm -rf "$THEOS"
+
           echo "Installing Theos to $THEOS..."
-          git clone --recursive https://github.com/theos/theos.git $THEOS
-          
+          git clone --recursive https://github.com/theos/theos.git "$THEOS"
+
           echo "Installing theos-jailed module..."
-          mkdir -p $THEOS/modules
-          git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/modules/theos-jailed
-          
+          mkdir -p "$THEOS/modules"
+          git clone https://github.com/kabiroberai/theos-jailed.git "$THEOS/modules/theos-jailed"
+
+          echo "Preparing SDK folder..."
+          rm -rf "$THEOS/sdks"
+          mkdir -p "$THEOS/sdks"
+
           echo "Downloading SDKs..."
-          mkdir -p $THEOS/sdks
-          curl -L https://github.com/theos/sdks/archive/master.zip -o sdks.zip
+          curl -L https://github.com/theos/sdks/archive/refs/heads/master.zip -o sdks.zip
           unzip -q sdks.zip
-          # Pindahkan isi folder sdks-master ke dalam $THEOS/sdks
-          mv sdks-master/* $THEOS/sdks/
+
+          echo "Moving SDKs..."
+          cp -R sdks-master/*.sdk "$THEOS/sdks/"
+
           rm -rf sdks-master sdks.zip
-          
+
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "$THEOS/bin" >> $GITHUB_PATH
-          
+
+          echo "Installed SDKs:"
+          ls -la "$THEOS/sdks"
+
       - name: Build tweak
         run: |
-          # Di macOS, env THEOS sudah otomatis terbaca dari step sebelumnya
+          set -e
+
+          export THEOS="$HOME/theos"
           export ARCHS="arm64 arm64e"
           export TARGET="iphone:clang:latest:11.0"
+
           make clean
           make package
-          
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
