@@ -1,66 +1,44 @@
-name: Build Theos Jailed Tweak
+name: Build Tweak with Theos
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git build-essential curl libreadline-dev \
-            libncurses5-dev libssl-dev libxml2-dev libplist-dev libzip-dev \
-            unzip
-
+        with:
+          submodules: 'recursive'
+          
       - name: Setup Theos
+        uses: Randomblock1/theos-action@v1
+        with:
+          theos-dir: 'theos'
+          theos-src: 'https://github.com/theos/theos'
+          theos-sdks: 'https://github.com/theos/sdks'
+          orion: 'false'
+          
+      - name: Install theos-jailed module
         run: |
-          set -e
-          THEOS_PATH=$HOME/theos
-          echo "Installing Theos to $THEOS_PATH"
-          git clone --recursive https://github.com/theos/theos.git $THEOS_PATH
+          # Pakai variabel $THEOS yang sudah disediakan oleh action
+          mkdir -p $THEOS/modules
+          git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/modules/theos-jailed
           
-          echo "Installing theos-jailed module..."
-          git clone https://github.com/kabiroberai/theos-jailed.git $THEOS_PATH/modules/theos-jailed
-          
-          echo "Downloading toolchain..."
-          curl -fLO https://github.com/theos/toolchain/releases/download/v1.1.0/toolchain-linux-x86_64.tar.gz
-          tar -xf toolchain-linux-x86_64.tar.gz -C $THEOS_PATH
-          
-          echo "Downloading SDKs..."
-          mkdir -p $THEOS_PATH/sdks
-          curl -fL https://github.com/theos/sdks/archive/master.zip -o sdks.zip
-          unzip -qo sdks.zip -d $THEOS_PATH/sdks
-          mv $THEOS_PATH/sdks/sdks-master/* $THEOS_PATH/sdks/
-          
-          # Cleanup
-          rm sdks.zip toolchain-linux-x86_64.tar.gz
-          
-          # Verify installations
-          if [ ! -f "$THEOS_PATH/toolchain/linux/iphone/bin/clang" ]; then
-            echo "Error: Toolchain not found at $THEOS_PATH/toolchain/linux/iphone/bin/clang"
-            exit 1
-          fi
-          
-          echo "THEOS=$THEOS_PATH" >> $GITHUB_ENV
-          echo "$THEOS_PATH/bin" >> $GITHUB_PATH
-
       - name: Build tweak
         run: |
-          export TARGET=iphone:clang:latest:11.0
+          # ARCHS dan TARGET sesuaikan dengan Makefile atau set di sini
           export ARCHS="arm64 arm64e"
+          export TARGET="iphone:clang:latest:11.0"
           make clean
           make package
-          ls -la packages/
-
-      - name: Upload deb package
+          
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mlbb-esp-deb
+          name: mlbb-esp
           path: packages/*.deb
