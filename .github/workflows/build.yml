@@ -15,23 +15,31 @@ jobs:
         with:
           submodules: 'recursive'
           
-      - name: Setup Theos
-        uses: Randomblock1/theos-action@v1
-        with:
-          theos-dir: 'theos'
-          theos-src: 'https://github.com/theos/theos'
-          theos-sdks: 'https://github.com/theos/sdks'
-          orion: 'false'
-          
-      - name: Install theos-jailed module
+      - name: Setup Theos (Manual)
         run: |
-          # Pakai variabel $THEOS yang sudah disediakan oleh action
+          set -e
+          export THEOS=$HOME/theos
+          echo "Installing Theos to $THEOS..."
+          git clone --recursive https://github.com/theos/theos.git $THEOS
+          
+          echo "Installing theos-jailed module..."
           mkdir -p $THEOS/modules
           git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/modules/theos-jailed
           
+          echo "Downloading SDKs..."
+          mkdir -p $THEOS/sdks
+          curl -L https://github.com/theos/sdks/archive/master.zip -o sdks.zip
+          unzip -q sdks.zip
+          # Pindahkan isi folder sdks-master ke dalam $THEOS/sdks
+          mv sdks-master/* $THEOS/sdks/
+          rm -rf sdks-master sdks.zip
+          
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
+          echo "$THEOS/bin" >> $GITHUB_PATH
+          
       - name: Build tweak
         run: |
-          # ARCHS dan TARGET sesuaikan dengan Makefile atau set di sini
+          # Di macOS, env THEOS sudah otomatis terbaca dari step sebelumnya
           export ARCHS="arm64 arm64e"
           export TARGET="iphone:clang:latest:11.0"
           make clean
