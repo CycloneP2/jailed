@@ -1,0 +1,50 @@
+name: Build Theos Jailed Tweak
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git build-essential curl libreadline-dev \
+            libncurses5-dev libssl-dev libxml2-dev libplist-dev libzip-dev \
+            unzip
+
+      - name: Setup Theos
+        run: |
+          export THEOS=~/theos
+          git clone --recursive https://github.com/theos/theos.git $THEOS
+          cd $THEOS
+          git submodule update --init --recursive
+          # Install theos-jailed module
+          git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/modules/theos-jailed
+          # Set SDK (pake SDK 14.5 biar kompatibel)
+          curl -L -o $THEOS/sdks/iPhoneOS14.5.sdk.zip "https://github.com/theos/sdks/archive/refs/heads/master.zip"
+          mkdir -p $THEOS/sdks
+          # Simpan environment
+          echo "THEOS=~/theos" >> $GITHUB_ENV
+          echo "$THEOS/bin" >> $GITHUB_PATH
+
+      - name: Build tweak
+        run: |
+          export THEOS=~/theos
+          export TARGET=iphone:clang:latest:11.0
+          export ARCHS="arm64 arm64e"
+          make clean
+          make package
+          ls -la packages/
+
+      - name: Upload deb package
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlbb-esp-deb
+          path: packages/*.deb

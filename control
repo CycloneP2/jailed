@@ -1,0 +1,11 @@
+Package: com.edgy.mlbb-esp
+Name: EDGY ESP
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: ESP for Mobile Legends - Box, HP, Name, Snapline, Monster ESP
+Maintainer: Edgy
+Author: Edgy
+Section: Tweaks
+Depends: mobilesubstrate, firmware (>= 11.0)
+Conflicts: 
+Replaces: 
