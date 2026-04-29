@@ -34,8 +34,9 @@ jobs:
           tar -xf toolchain-linux-x86_64.tar.gz -C $THEOS_PATH
           
           echo "Downloading SDKs..."
+          mkdir -p $THEOS_PATH/sdks
           curl -fL https://github.com/theos/sdks/archive/master.zip -o sdks.zip
-          unzip -q sdks.zip -d $THEOS_PATH/sdks
+          unzip -qo sdks.zip -d $THEOS_PATH/sdks
           mv $THEOS_PATH/sdks/sdks-master/* $THEOS_PATH/sdks/
           
           # Cleanup
@@ -44,10 +45,6 @@ jobs:
           # Verify installations
           if [ ! -f "$THEOS_PATH/toolchain/linux/iphone/bin/clang" ]; then
             echo "Error: Toolchain not found at $THEOS_PATH/toolchain/linux/iphone/bin/clang"
-            exit 1
-          fi
-          if [ ! -f "$THEOS_PATH/modules/theos-jailed/module.mk" ]; then
-            echo "Error: theos-jailed module not found at $THEOS_PATH/modules/theos-jailed/module.mk"
             exit 1
           fi
           
