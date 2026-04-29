@@ -21,30 +21,41 @@ jobs:
 
       - name: Setup Theos
         run: |
-          export THEOS=~/theos
-          git clone --recursive https://github.com/theos/theos.git $THEOS
+          set -e
+          THEOS_PATH=$HOME/theos
+          echo "Installing Theos to $THEOS_PATH"
+          git clone --recursive https://github.com/theos/theos.git $THEOS_PATH
           
-          # Install theos-jailed module
-          git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/modules/theos-jailed
+          echo "Installing theos-jailed module..."
+          git clone https://github.com/kabiroberai/theos-jailed.git $THEOS_PATH/modules/theos-jailed
           
-          # Install Toolchain (Linux x86_64)
-          curl -LO https://github.com/theos/toolchain/releases/download/v1.1.0/toolchain-linux-x86_64.tar.gz
-          tar -xf toolchain-linux-x86_64.tar.gz -C $THEOS
+          echo "Downloading toolchain..."
+          curl -fLO https://github.com/theos/toolchain/releases/download/v1.1.0/toolchain-linux-x86_64.tar.gz
+          tar -xf toolchain-linux-x86_64.tar.gz -C $THEOS_PATH
           
-          # Set SDKs
-          mkdir -p $THEOS/sdks
-          curl -L https://github.com/theos/sdks/archive/master.zip -o sdks.zip
-          unzip -q sdks.zip -d $THEOS/sdks
-          mv $THEOS/sdks/sdks-master/* $THEOS/sdks/
-          rm -rf $THEOS/sdks/sdks-master sdks.zip toolchain-linux-x86_64.tar.gz
-
-          # Simpan environment
-          echo "THEOS=~/theos" >> $GITHUB_ENV
-          echo "$THEOS/bin" >> $GITHUB_PATH
+          echo "Downloading SDKs..."
+          curl -fL https://github.com/theos/sdks/archive/master.zip -o sdks.zip
+          unzip -q sdks.zip -d $THEOS_PATH/sdks
+          mv $THEOS_PATH/sdks/sdks-master/* $THEOS_PATH/sdks/
+          
+          # Cleanup
+          rm sdks.zip toolchain-linux-x86_64.tar.gz
+          
+          # Verify installations
+          if [ ! -f "$THEOS_PATH/toolchain/linux/iphone/bin/clang" ]; then
+            echo "Error: Toolchain not found at $THEOS_PATH/toolchain/linux/iphone/bin/clang"
+            exit 1
+          fi
+          if [ ! -f "$THEOS_PATH/modules/theos-jailed/module.mk" ]; then
+            echo "Error: theos-jailed module not found at $THEOS_PATH/modules/theos-jailed/module.mk"
+            exit 1
+          fi
+          
+          echo "THEOS=$THEOS_PATH" >> $GITHUB_ENV
+          echo "$THEOS_PATH/bin" >> $GITHUB_PATH
 
       - name: Build tweak
         run: |
-          export THEOS=~/theos
           export TARGET=iphone:clang:latest:11.0
           export ARCHS="arm64 arm64e"
           make clean
