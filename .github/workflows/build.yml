@@ -23,13 +23,21 @@ jobs:
         run: |
           export THEOS=~/theos
           git clone --recursive https://github.com/theos/theos.git $THEOS
-          cd $THEOS
-          git submodule update --init --recursive
+          
           # Install theos-jailed module
           git clone https://github.com/kabiroberai/theos-jailed.git $THEOS/modules/theos-jailed
-          # Set SDK (pake SDK 14.5 biar kompatibel)
-          curl -L -o $THEOS/sdks/iPhoneOS14.5.sdk.zip "https://github.com/theos/sdks/archive/refs/heads/master.zip"
+          
+          # Install Toolchain (Linux x86_64)
+          curl -LO https://github.com/theos/toolchain/releases/download/v1.1.0/toolchain-linux-x86_64.tar.gz
+          tar -xf toolchain-linux-x86_64.tar.gz -C $THEOS
+          
+          # Set SDKs
           mkdir -p $THEOS/sdks
+          curl -L https://github.com/theos/sdks/archive/master.zip -o sdks.zip
+          unzip -q sdks.zip -d $THEOS/sdks
+          mv $THEOS/sdks/sdks-master/* $THEOS/sdks/
+          rm -rf $THEOS/sdks/sdks-master sdks.zip toolchain-linux-x86_64.tar.gz
+
           # Simpan environment
           echo "THEOS=~/theos" >> $GITHUB_ENV
           echo "$THEOS/bin" >> $GITHUB_PATH
