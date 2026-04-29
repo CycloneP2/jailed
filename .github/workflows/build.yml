@@ -17,23 +17,24 @@ jobs:
 
       - name: Install dependencies
         run: |
+          set -e
           brew install ldid make xz dpkg
 
-      - name: Setup Theos Manual
+      - name: Setup Theos and theos-jailed
         run: |
           set -e
 
           export THEOS="$HOME/theos"
 
-          echo "Cleaning old Theos if exists..."
+          echo "Removing old Theos..."
           rm -rf "$THEOS"
 
-          echo "Installing Theos to $THEOS..."
+          echo "Installing Theos..."
           git clone --recursive https://github.com/theos/theos.git "$THEOS"
 
-          echo "Installing theos-jailed module..."
+          echo "Installing theos-jailed as jailed module..."
           mkdir -p "$THEOS/modules"
-          git clone https://github.com/kabiroberai/theos-jailed.git "$THEOS/modules/theos-jailed"
+          git clone https://github.com/kabiroberai/theos-jailed.git "$THEOS/modules/jailed"
 
           echo "Preparing SDK folder..."
           rm -rf "$THEOS/sdks"
@@ -43,18 +44,48 @@ jobs:
           curl -L https://github.com/theos/sdks/archive/refs/heads/master.zip -o sdks.zip
           unzip -q sdks.zip
 
-          echo "Moving SDKs..."
+          echo "Copying SDKs..."
           cp -R sdks-master/*.sdk "$THEOS/sdks/"
 
           rm -rf sdks-master sdks.zip
 
-          echo "THEOS=$THEOS" >> $GITHUB_ENV
-          echo "$THEOS/bin" >> $GITHUB_PATH
+          echo "THEOS=$THEOS" >> "$GITHUB_ENV"
+          echo "$THEOS/bin" >> "$GITHUB_PATH"
+
+          echo "Installed modules:"
+          ls -la "$THEOS/modules"
+
+          echo "Installed jailed module:"
+          ls -la "$THEOS/modules/jailed"
+          ls -la "$THEOS/modules/jailed/module"
 
           echo "Installed SDKs:"
           ls -la "$THEOS/sdks"
 
-      - name: Build tweak
+      - name: Debug project structure
+        run: |
+          set -e
+
+          echo "Current directory:"
+          pwd
+
+          echo "Project files:"
+          ls -la
+
+          echo "Workflow folder:"
+          ls -la .github || true
+          ls -la .github/workflows || true
+
+          echo "Makefile:"
+          cat Makefile
+
+          echo "Plist files:"
+          ls -la *.plist || true
+
+          echo "Control file:"
+          cat control || true
+
+      - name: Build package
         run: |
           set -e
 
@@ -65,8 +96,23 @@ jobs:
           make clean
           make package
 
+      - name: Show build output
+        if: always()
+        run: |
+          echo "Packages:"
+          ls -la packages || true
+
+          echo "Theos build folder:"
+          ls -la .theos || true
+
+          echo "Object files:"
+          find .theos -type f || true
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mlbb-esp
-          path: packages/*.deb
+          name: mlbb-esp-build
+          path: |
+            packages/*
+            .theos/obj/**/*.dylib
+          if-no-files-found: warn
