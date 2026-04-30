@@ -8,6 +8,9 @@
 		<array>
 			<string>com.mobile.legends</string>
 			<string>com.mobilelegends.game</string>
+			<string>com.mobile.legends.us</string>
+			<string>com.skystone.mlbb</string>
+			<string>com.mobilelegends.game.us</string>
 		</array>
 	</dict>
 </dict>
