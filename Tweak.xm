@@ -9,18 +9,18 @@
 typedef struct { float x, y, z; } Vector3;
 
 // ============================================
-// OFFSETS (HASIL DUMP LO)
+// OFFSETS (HASIL DUMP VERSI 2.1.67.1173.1)
 // ============================================
-#define RVA_BATTLE_MANAGER_INST 0xADC8A0   
+#define RVA_BATTLE_MANAGER_INST 0x6A48A98   // UPDATED
 #define OFF_SHOW_PLAYERS        0x78        
 #define OFF_SHOW_MONSTERS       0x80        
 #define OFF_LOCAL_PLAYER        0x50        
 
-#define OFF_ENTITY_POS          0x310       
+#define OFF_ENTITY_POS          0x294       // UPDATED from 0x310
 #define OFF_ENTITY_CAMP         0xD8        
 #define OFF_ENTITY_HP           0x1AC       
 #define OFF_ENTITY_HP_MAX       0x1B0       
-#define OFF_ENTITY_SHIELD       0x1B8       
+#define OFF_ENTITY_SHIELD       0x1C4       // UPDATED from 0x1B8
 #define OFF_PLAYER_HERO_NAME    0x918       
 #define OFF_ENTITY_ID           0x194       
 
@@ -407,7 +407,6 @@ float distance3D(Vector3 a, Vector3 b) {
 }
 
 - (void)createMenu {
-    // Ambil window dengan aman
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     if (!window) {
         window = [UIApplication sharedApplication].windows.firstObject;
@@ -517,5 +516,5 @@ float distance3D(Vector3 a, Vector3 b) {
 
 %ctor {
     %init;
-    NSLog(@"✅ EDGY ESP MLBB LOADED");
+    NSLog(@"✅ EDGY ESP MLBB LOADED - OFFSET UPDATED v2.1.67.1173.1");
 }
