@@ -6,6 +6,7 @@
 	<dict>
 		<key>Bundles</key>
 		<array>
+			<string>com.mobile.legends.usa</string>
 			<string>com.mobile.legends</string>
 			<string>com.mobilelegends.game</string>
 			<string>com.mobile.legends.us</string>
