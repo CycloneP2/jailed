@@ -1,6 +1,6 @@
 export THEOS_PACKAGE_DIR_NAME = packages
-export TARGET = iphone:clang:latest:11.0
-export ARCHS = arm64 arm64e
+export TARGET = iphone:clang:latest:18.0
+export ARCHS = arm64
 
 MODULES = jailed
 

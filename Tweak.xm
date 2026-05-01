@@ -47,7 +47,7 @@ static uintptr_t g_unityBase = 0;
 static intptr_t g_slide = 0;  // FIX #1: Simpan slide
 
 // FIX #3: WorldToScreen - Simpan sebagai IMP
-static void* (*orig_Camera_WorldToScreenPoint)(void* camera, Vector3 worldPos) = NULL;
+static Vector3 (*orig_Camera_WorldToScreenPoint)(void* camera, Vector3 worldPos) = NULL;
 static void* (*orig_Camera_get_main)() = NULL;
 
 // ============================================
@@ -426,11 +426,11 @@ Vector3 worldToScreen(Vector3 worldPos) {
         if (!g_unityBase) g_unityBase = get_base_with_slide("MobileMLBB");
         
         if (g_unityBase) {
-            NSLog(@"✅ Base ditemukan: %llX, slide: %ld", g_unityBase, (long)g_slide);
+            NSLog(@"✅ Base ditemukan: %lX, slide: %ld", (unsigned long)g_unityBase, (long)g_slide);
             
             // FIX #3: Setup WorldToScreen function (ganti offset sesuai dump lo)
             // orig_Camera_get_main = (void*(*)()) (g_unityBase + 0x89FF130);
-            // orig_Camera_WorldToScreenPoint = (void*(*)(void*, Vector3)) (g_unityBase + 0x89FE040);
+            // orig_Camera_WorldToScreenPoint = (Vector3 (*)(void*, Vector3)) (g_unityBase + 0x89FE040);
             
             UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
             if (!keyWindow) keyWindow = [UIApplication sharedApplication].windows.firstObject;
