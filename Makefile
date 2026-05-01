@@ -11,7 +11,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = MLBBESP
 
 MLBBESP_FILES = Tweak.xm
-MLBBESP_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
+MLBBESP_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-variable
 MLBBESP_FRAMEWORKS = UIKit Foundation CoreGraphics QuartzCore
 MLBBESP_PRIVATE_FRAMEWORKS = IOKit
 
